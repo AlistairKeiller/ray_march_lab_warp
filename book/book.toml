@@ -1,0 +1,22 @@
+[book]
+language = "en"
+multilingual = false
+src = "src"
+title = "Ray March Lab"
+
+[output.html]
+additional-css = ["theme/css/custom.css"]
+additional-js = ["theme/solution.js"]
+default-theme = "light"
+preferred-dark-theme = "ayu"
+smart-punctuation = true
+no-section-label = true
+git-repository-url = "https://github.com/uci-f1tenth/ray_march_lab_warp"
+mathjax-support = true
+
+[output.html.fold]
+enable = false
+
+[build]
+build-dir = "html"
+create-missing = false

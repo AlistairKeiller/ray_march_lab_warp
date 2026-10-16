@@ -1,0 +1,26 @@
+[project]
+name = "ray-march-lab-warp"
+version = "0.1.0"
+description = "Ray marching puzzles in NVIDIA Warp, built around the lidar kernel from warporacer"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "imageio>=2.37.3",
+    "numpy>=2.4.4",
+    "pyyaml>=6.0.3",
+    "scipy>=1.17.1",
+    "warp-lang>=1.18.0",
+]
+
+[project.optional-dependencies]
+viz = ["matplotlib>=3.10.9"]
+
+# `harness/` (the canary + map loader the puzzles import) lives at the repo root,
+# so `uv run python problems/pXX/pXX.py` resolves it from any directory.
+[build-system]
+requires = ["uv_build>=0.9,<0.14"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "harness"
+module-root = ""

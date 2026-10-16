@@ -1,0 +1,21 @@
+/* Light/dark figure pairs: the page carries both and the theme picks one. */
+.light-mode-img { display: block; }
+.dark-mode-img { display: none; }
+.ayu .light-mode-img, .navy .light-mode-img, .coal .light-mode-img { display: none; }
+.ayu .dark-mode-img, .navy .dark-mode-img, .coal .dark-mode-img { display: block; }
+
+.solution-details > summary {
+  cursor: pointer;
+  font-weight: 600;
+  padding: 0.4em 0;
+}
+
+.solution-tips, .solution-explanation {
+  border-left: 3px solid var(--links);
+  padding-left: 1em;
+}
+
+.filename {
+  font-family: var(--mono-font, monospace);
+  font-size: 0.85em;
+}
