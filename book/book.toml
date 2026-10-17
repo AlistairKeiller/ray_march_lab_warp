@@ -11,7 +11,7 @@ default-theme = "light"
 preferred-dark-theme = "ayu"
 smart-punctuation = true
 no-section-label = true
-git-repository-url = "https://github.com/uci-f1tenth/ray_march_lab_warp"
+git-repository-url = "https://github.com/AlistairKeiller/ray_march_lab_warp"
 mathjax-support = true
 
 [output.html.fold]

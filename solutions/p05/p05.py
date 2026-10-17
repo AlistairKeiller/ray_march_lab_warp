@@ -125,8 +125,9 @@ if __name__ == "__main__":
     print(f"edt stack: {edt.shape} from", ", ".join(f"{t.name} ({t.h} x {t.w})" for t in tracks))
     for k, t in enumerate(tracks):
         i = k * CARS_PER_MAP
-        print(f"{t.name}: car {i} out (every 18th beam):", scan.numpy()[i, ::18])
-        print(f"{' ' * len(t.name)}  expected:               ", expected[i, ::18])
+        print(f"{t.name} car {i}")
+        print("  out (every 18th beam):", scan.numpy()[i, ::18])
+        print("  expected:             ", expected[i, ::18])
     print(f"max |out - expected|: {np.abs(scan.numpy() - expected).max():.2e} m")
     np.testing.assert_allclose(scan.numpy(), expected, atol=max(t.res for t in tracks))
     mem.verify()

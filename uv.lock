@@ -424,7 +424,7 @@ requires-dist = [
     { name = "numpy", specifier = ">=2.4.4" },
     { name = "pyyaml", specifier = ">=6.0.3" },
     { name = "scipy", specifier = ">=1.17.1" },
-    { name = "warp-lang", specifier = ">=1.12.1" },
+    { name = "warp-lang", specifier = ">=1.18.0" },
 ]
 provides-extras = ["viz"]
 
