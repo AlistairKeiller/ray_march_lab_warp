@@ -10,7 +10,8 @@ NUM_CARS = 4
 SIZE = 8  # the map is a SIZE x SIZE px room with a 1 px wall all round
 RES = 0.5  # m/px, coarse so the whole room fits in a print
 ORIGIN = (-2.0, -2.0)  # world x, y of the bottom-left pixel
-HALF_DIAG = float(np.hypot(0.42, 0.58) / 2.0)  # m, half the car's diagonal
+CAR_W, CAR_L = 0.42, 0.58  # m, the F1TENTH's width and length
+HALF_DIAG = float(np.hypot(CAR_W, CAR_L) / 2.0)  # m, half the car's diagonal
 
 
 # ANCHOR: clearance_solution

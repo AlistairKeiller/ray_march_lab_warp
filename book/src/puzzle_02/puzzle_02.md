@@ -23,16 +23,23 @@ In this puzzle, you'll learn about:
 For each car \\(i\\) at world position \\((x_i, y_i)\\):
 
 \\[\Large col = \left\lfloor \frac{x_i - o_x}{res} \right\rfloor \qquad
-row = \left\lfloor (h - 1) - \frac{y_i - o_y}{res} \right\rfloor\\]
+row = \left\lfloor (H - 1) - \frac{y_i - o_y}{res} \right\rfloor\\]
 
-\\[\Large output[i] = edt[row, col] \times res - \tfrac{1}{2}\sqrt{W^2 + L^2}\\]
+\\[\Large output[i] = edt[row, col] \times res - \frac{D}{2} \qquad
+D^2 = W_{car}^2 + L_{car}^2\\]
+
+where \\((o_x, o_y)\\) is the world position of the map's bottom-left pixel,
+\\(res\\) its resolution in meters per pixel, \\(H\\) its height in pixels,
+and \\(W_{car} = 0.42\\) m and \\(L_{car} = 0.58\\) m are the F1TENTH's width
+and length. \\(D\\) is the car's diagonal, so \\(D / 2\\) is the furthest any
+corner of the car reaches from its centre; in the code it is `HALF_DIAG`.
 
 ### The row flip
 
 A ROS map's `origin` is the world position of the **bottom-left** pixel, and
 world \\(y\\) increases upward. Image rows increase downward from the top. So
 \\(x\\) maps straight onto columns, but \\(y\\) maps onto rows from the bottom:
-row \\(h - 1\\) is \\(y = o_y\\). Get this flip wrong and every car drives a
+row \\(H - 1\\) is \\(y = o_y\\). Get this flip wrong and every car drives a
 mirrored track, and nothing complains until the lidar looks wrong.
 
 ### Why clamp
@@ -47,7 +54,8 @@ there), which is also the right answer: off the map counts as crashed.
 - Cars: `NUM_CARS = 4`, as rows of `[x, y, psi]`
 - Map: an `8 x 8` px room with a 1 px wall all round, `RES = 0.5` m/px,
   `ORIGIN = (-2, -2)`
-- Car size: `HALF_DIAG = hypot(0.42, 0.58) / 2` m, half the F1TENTH's diagonal
+- Car size: `CAR_W = 0.42` m by `CAR_L = 0.58` m, the F1TENTH's width and length;
+  `HALF_DIAG = hypot(CAR_W, CAR_L) / 2` is half its diagonal
 - One thread per car: `wp.launch(..., dim=NUM_CARS)`
 
 Notes:
