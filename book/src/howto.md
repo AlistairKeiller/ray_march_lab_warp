@@ -1,4 +1,4 @@
-## How to Use This Book
+# How to Use This Book
 
 Each puzzle keeps the same structure:
 
@@ -6,7 +6,7 @@ Each puzzle keeps the same structure:
 - **Key concepts**: the Warp features and the geometry the puzzle introduces
 - **Configuration**: sizes, units, and the layout of the arrays involved
 - **Code to complete**: the file in `problems/pXX/` with a `# FILL ME IN` gap
-- **Tips**: hints you can open one at a time without seeing the answer
+- **Tips**: hints you can open without seeing the answer
 - **Running the code**: the command, and what the output looks like before and
   after you solve it
 - **Solution**: the reference implementation with an explanation
@@ -14,6 +14,12 @@ Each puzzle keeps the same structure:
 The puzzles build on each other, so work through them in order. Puzzle 4 uses
 the function you write in Puzzle 3, and Puzzle 6 benchmarks the kernel from
 Puzzle 5.
+
+This lab has a twin written in Mojo,
+[ray_march_lab](https://github.com/AlistairKeiller/ray_march_lab), with the
+same six puzzles, the same map loader and the same book. Where this page says
+`uv run python problems/pXX/pXX.py`, that one says
+`uv run mojo -I . problems/pXX/pXX.mojo`.
 
 ## Running the code
 
@@ -33,10 +39,12 @@ two that fused multiply-adds move the samples by.
   gcc or clang on Linux, MSVC build tools on Windows
 - **Optionally an NVIDIA GPU** with a driver that supports CUDA 12. Warp uses
   `cuda:0` when it finds one and `cpu` otherwise; every puzzle runs on both
+- **[mdbook](https://rust-lang.github.io/mdBook/)** to serve this book locally
+  (`brew install mdbook` or `cargo install mdbook`)
 
 There is no Apple GPU backend in Warp, so on a Mac the kernels run on the CPU.
 That is fine for Puzzles 1–5, which are small, and Puzzle 6 scales its defaults
-down on CPU.
+down on CPU. The Mojo twin runs the same puzzles on the Apple GPU.
 
 ### Programming knowledge
 
@@ -81,7 +89,7 @@ needs.
 - **`problems/`**: where you implement your solutions (this is where you work!)
 - **`solutions/`**: the reference solutions, which the book quotes
 - **`harness/`**: the guarded output arrays and the map loader every puzzle
-  imports
+  imports, with a self-test of the guard under `harness/test/`
 - **`maps/`**: the track maps from warporacer, as ROS map yaml + image pairs
 
 ### Workflow
@@ -110,7 +118,7 @@ would corrupt whatever happened to be next in memory, silently.
 The margins extend 256 bytes past each end, so a write further out than that
 goes unreported. A clean check is good evidence, not proof. Puzzle 6 drives
 its kernels from a benchmark loop rather than the harness and has no guarded
-array; it checks the two layouts against each other instead.
+array; it checks its four launches against each other instead.
 
 ### Essential commands
 
@@ -120,15 +128,17 @@ uv run python problems/pXX/pXX.py        # your implementation
 uv run python solutions/pXX/pXX.py       # the reference
 
 # Test solutions
-bash solutions/run.sh                    # all of them
+bash solutions/run.sh                    # all of them, plus the harness self-test
 bash solutions/run.sh p03                # one
 
-# The benchmark at full scale (defaults: 8192 envs on CUDA, 1024 on CPU)
+# The benchmark at full scale (defaults: 8192 envs on CUDA, 4096 on CPU)
 uv run python problems/p06/p06.py maps/ --num-envs 8192 --steps 500
 uv run python problems/p06/p06.py maps/Spielberg_map.yaml --device cpu
 
 # Checks the book relies on
+bash scripts/check_problems.sh           # every unfilled skeleton runs and fails at its own check
 uv run python scripts/check_skeletons.py # problems == solutions outside the FILL regions
+uv run python scripts/check_canaries.py  # every learner-written kernel uses the guarded array
 uv run python scripts/check_book_refs.py # every include, link and image in the book resolves
 
 # Figures (needs the viz extra)

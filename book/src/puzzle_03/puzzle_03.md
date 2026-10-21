@@ -148,11 +148,24 @@ after, so the final step is allowed to carry `dist` past `max_px`. The
 `wp.min` at the return is what makes a capped ray report exactly the cap, which
 is what the lidar needs (a beam that sees nothing within 20 m reports 20 m).
 
-Why the pillar matters: without it, `edt[8, 8]` would be 7 and ray 0 would
-reach the wall in one step. Real tracks are all pillar: the distance field in a
-corridor is the distance to the nearer wall, and a ray down the corridor takes
-a few medium steps rather than one big one. That step count, around 5 to 20 on
-the F1TENTH maps, is what the lidar kernel's cost comes down to.
+### Where the 0.106 comes from
+
+Ray 0 reports 6.606 px, yet the wall it hits, column 15, begins 6.5 px from
+the start at 8.5. The field is measured between pixel centres: from the centre
+of pixel (8, 12) the nearest wall pixel's centre is 3 px away, so from 12.106 a
+step of 3 lands at 15.106, a tenth of a pixel inside the wall pixel. A sphere
+march always stops inside the wall pixel, never on its boundary, and from an
+arbitrary point in a pixel it can land up to a pixel past the edge. warporacer
+lives with this: a pixel is 5 cm on a real track, the car itself is 42 × 58 cm,
+and the training randomises far bigger things than that every episode.
+
+### Why the pillar matters
+
+Without it, `edt[8, 8]` would be 7 and ray 0 would reach the wall in one step.
+Real tracks are all pillar: the distance field in a corridor is the distance to
+the nearer wall, and a ray down the corridor takes a few medium steps rather
+than one big one. That step count, around 5 to 20 on the F1TENTH maps, is what
+the lidar kernel's cost comes down to.
 
 </div>
 </details>

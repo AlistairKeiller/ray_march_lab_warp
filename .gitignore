@@ -1,4 +1,4 @@
-# Python-generated files
+# Python
 __pycache__/
 *.py[oc]
 build/
@@ -9,10 +9,18 @@ wheels/
 # Virtual environments
 .venv
 
+# Mojo build artifacts
+*.mojoc
+*.mojopkg
+
 # mdbook output
 book/html/
 book/book/
 
 # macOS
 .DS_Store
-**/.DS_Store
+
+# editor / agent rules
+.cursor/
+.claude/
+.agents/

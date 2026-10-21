@@ -11,6 +11,12 @@ puzzles rebuild the lidar simulator from
 F1TENTH racing sim that marches 8,192 cars × 108 laser beams through a track
 image sixty times a simulated second, one piece at a time.
 
+The same six puzzles exist in Mojo, in the twin lab
+[ray_march_lab](https://github.com/AlistairKeiller/ray_march_lab). The two
+books share their text, their figures, their map loader and their numbering;
+only the kernels differ. If you want to see how the same launch looks in the
+other language, open the same page there.
+
 ## Why ray marching?
 
 A racing policy sees the world through a lidar: a fan of ranges, one per beam,
@@ -82,9 +88,11 @@ def lidar(...):
 
 ### Fit the thread grid to the data
 
-Puzzle 6 launches the same march two ways, one thread per car and one thread
-per (car, beam), and times both. The answer differs between a CPU and a GPU,
-and understanding why is most of what GPU performance work is about.
+Puzzle 6 launches the same march four ways: one thread per (car, beam), one
+thread per car, the grid turned round so that neighbouring threads are
+neighbouring cars, and the per-beam launch with the one-pixel stepper the
+distance field replaces. It times all four. The answers differ between a CPU
+and a GPU, and understanding why is most of what GPU performance work is about.
 
 ### Data movement is the cost
 
@@ -98,11 +106,11 @@ of multiplies in between.
 
 | Part                         | Puzzles | You will write                                               |
 |------------------------------|---------|--------------------------------------------------------------|
-| I: Warp fundamentals         | 1–2     | A kernel, a launch, 2D indexing, vectors, clamps             |
+| I: Fundamentals              | 1–2     | A kernel, a launch, 2D indexing, vectors, clamps             |
 | II: Ray marching             | 3–5     | The sphere march, a 108-beam lidar, a padded multi-map stack |
 | III: Performance             | 6       | A second thread layout, and a benchmark at warporacer scale  |
 
-**Part I: Warp fundamentals (Puzzles 1–2)**
+**Part I: Fundamentals (Puzzles 1–2)**
 
 - Write a `@wp.kernel`, index it with `wp.tid()`, launch it with `wp.launch`
 - Read a 2D raster at a world position: origin, resolution, and the row flip
@@ -118,7 +126,8 @@ of multiplies in between.
 **Part III: Performance (Puzzle 6)**
 
 - Write the one-thread-per-car layout and compare it with one-thread-per-beam
-- Benchmark both at warporacer scale with recorded launches, thread-pool
+- Time the one-pixel stepper the distance field replaces, and a transposed grid
+- Benchmark all four at warporacer scale with recorded launches, thread-pool
   sharding on CPU, and (on CUDA) texture sampling
 
 ## Ready to get started?

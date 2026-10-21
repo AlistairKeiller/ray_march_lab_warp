@@ -69,7 +69,8 @@ Notes:
 
 - **Map loading** is `harness.track.Track`: the image thresholded at 230,
   through SciPy's `distance_transform_edt`. It is warporacer's loader minus the
-  centerline extraction
+  centerline extraction, and the same file the Mojo twin drives through
+  Python interop
 - **Beam directions** are built in NumPy with
   `np.linspace(-FOV / 2, FOV / 2, NUM_LIDAR)` and passed as a
   `wp.array(dtype=wp.vec2)`

@@ -5,7 +5,7 @@
 - [🔦 Introduction](./introduction.md)
 - [🧭 Puzzles Usage Guide](./howto.md)
 
-## Part I: Warp Fundamentals
+## Part I: Fundamentals
 
 - [Puzzle 1: Map](./puzzle_01/puzzle_01.md)
 - [Puzzle 2: World to Pixel](./puzzle_02/puzzle_02.md)

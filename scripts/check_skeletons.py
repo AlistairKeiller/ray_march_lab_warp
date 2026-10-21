@@ -45,7 +45,7 @@ def drift(problem, solution):
 
 
 def main():
-    solutions = sorted((ROOT / "solutions").glob("p*/p*.py"))
+    solutions = sorted((ROOT / "solutions").glob("p*/p*.py")) + sorted((ROOT / "solutions").glob("p*/p*.mojo"))
     pairs = [(ROOT / "problems" / s.relative_to(ROOT / "solutions"), s) for s in solutions]
     pairs = [(p, s) for p, s in pairs if p.exists()]
     if not pairs:

@@ -38,8 +38,14 @@ class PuzzleMemory:
 
     def verify(self):
         """Fails the puzzle if any output array's margin was written to."""
+        if not self.margins_intact():
+            print("❌ Write detected outside of output buffer")
+            sys.exit(1)
+
+    def margins_intact(self):
+        """Whether every output array's margins still hold NaN."""
         for allocation, margin, count in self._allocations:
             buf = allocation.numpy()
             if not (np.isnan(buf[:margin]).all() and np.isnan(buf[margin + count :]).all()):
-                print("❌ Write detected outside of output buffer")
-                sys.exit(1)
+                return False
+        return True
