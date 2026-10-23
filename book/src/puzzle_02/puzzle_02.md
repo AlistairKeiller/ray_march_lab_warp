@@ -15,24 +15,31 @@ map, so the pixel indices need clamping._
 In this puzzle, you'll learn about:
 
 - 2D arrays: `wp.array2d(dtype=float)`, indexed `edt[row, col]`
-- Vector arguments: `wp.vec2`, with components `origin[0]` and `origin[1]`
+- The map origin as two scalar arguments, `ox` and `oy`
 - Float to int conversion with `wp.int32()`, which truncates toward zero
 - Clamping indices with `wp.clamp` instead of branching
 - Reading an array's shape inside a kernel: `edt.shape[0]`
 
-For each car \\(i\\) at world position \\((x_i, y_i)\\):
+For each car \\(i\\) at world position \\((x_i, y_i)\\), on a map of \\(H\\)
+rows by \\(W\\) columns:
 
-\\[\Large col = \left\lfloor \frac{x_i - o_x}{res} \right\rfloor \qquad
-row = \left\lfloor (H - 1) - \frac{y_i - o_y}{res} \right\rfloor\\]
+\\[\Large col = \operatorname{clamp}\left(\left\lfloor \frac{x_i - o_x}{res} \right\rfloor, 0, W - 1\right)\\]
 
-\\[\Large output[i] = edt[row, col] \times res - \frac{D}{2} \qquad
-D^2 = W_{car}^2 + L_{car}^2\\]
+\\[\Large row = \operatorname{clamp}\left(\left\lfloor (H - 1) - \frac{y_i - o_y}{res} \right\rfloor, 0, H - 1\right)\\]
 
-where \\((o_x, o_y)\\) is the world position of the map's bottom-left pixel,
-\\(res\\) its resolution in meters per pixel, \\(H\\) its height in pixels,
-and \\(W_{car} = 0.42\\) m and \\(L_{car} = 0.58\\) m are the F1TENTH's width
-and length. \\(D\\) is the car's diagonal, so \\(D / 2\\) is the furthest any
-corner of the car reaches from its centre; in the code it is `HALF_DIAG`.
+\\[\Large output[i] = edt[row, col] \times res - \frac{D}{2} \qquad D = \sqrt{0.42^2 + 0.58^2} \text{ m}\\]
+
+| in the formula | in the code | meaning |
+|---|---|---|
+| \\(x_i, y_i\\) | `cars[i, 0]`, `cars[i, 1]` | the car's world position, in meters |
+| \\(o_x, o_y\\) | `ox`, `oy` | the world position of the map's bottom-left pixel, `ORIGIN` |
+| \\(res\\) | `res` | the map's resolution, in meters per pixel |
+| \\(H, W\\) | `edt.shape[0]`, `edt.shape[1]` | the map's height and width, in pixels |
+| \\(D / 2\\) | `HALF_DIAG` | half the car's diagonal, 0.358 m: the furthest any corner of the 0.42 m by 0.58 m F1TENTH reaches from its centre |
+
+The floors are what `wp.int32()` does for every point inside the map: it truncates
+toward zero, which only differs from the floor for negative coordinates, a car
+left of or below the map, and the clamp sends those to 0 either way.
 
 ### The row flip
 
@@ -62,8 +69,8 @@ Notes:
 
 - **Shape in kernel**: `edt.shape[0]` is the number of rows, `edt.shape[1]` the
   number of columns
-- **vec2 argument**: pass `wp.vec2(ORIGIN)` from Python; index it `origin[0]`,
-  `origin[1]` in the kernel
+- **Origin**: `ORIGIN` is a tuple on the host and arrives in the kernel as the
+  two floats `ox` and `oy`
 - **Module constants**: `HALF_DIAG` is a plain Python float at module level,
   and Warp bakes it into the kernel as a constant
 
@@ -80,9 +87,9 @@ Notes:
 
 <div class="solution-tips">
 
-1. Column: `(cars[i, 0] - origin[0]) / res`, truncated with `wp.int32(...)`
-2. Row: `float(edt.shape[0] - 1) - (cars[i, 1] - origin[1]) / res`, truncated
-   the same way
+1. Column: `(cars[i, 0] - ox) / res`, truncated with `wp.int32(...)`
+2. Row: `float(edt.shape[0] - 1) - (cars[i, 1] - oy) / res`, truncated the
+   same way
 3. Clamp both to `[0, shape - 1]`: `wp.clamp(value, 0, edt.shape[k] - 1)`
 4. `output[i] = edt[row, col] * res - HALF_DIAG`
 

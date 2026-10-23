@@ -26,26 +26,43 @@ In this puzzle, you'll learn about:
 - Composing what you have: the pixel transform from Puzzle 2 and `raycast` from
   Puzzle 3
 
-For car \\(i\\) with heading \\(\psi_i\\) and beam \\(j\\) with direction
-\\((b_x, b_y)\\) in the car frame:
+For car \\(i\\) at \\((x_i, y_i)\\) with heading \\(\psi_i\\), and beam \\(j\\)
+with unit direction \\((b_x, b_y)\\) in the car frame, the ray starts at the
+pixel
 
-\\[\Large p = \text{px}\big(x_i + m\cos\psi_i,\; y_i + m\sin\psi_i\big) \qquad
-d = \begin{pmatrix} \cos\psi_i\, b_x - \sin\psi_i\, b_y \\\\ -(\sin\psi_i\, b_x + \cos\psi_i\, b_y) \end{pmatrix}\\]
+\\[\Large p = \begin{pmatrix} (x_i + m \cos\psi_i - o_x) / res \\\\ (H - 1) - (y_i + m \sin\psi_i - o_y) / res \end{pmatrix}\\]
 
-\\[\Large scan[i, j] = \text{raycast}(edt, p, d, R / res) \times res\\]
+and points along
 
-where \\(m\\) is the mount offset, \\(R\\) the lidar range and \\(\text{px}\\)
-the world-to-pixel transform from Puzzle 2.
+\\[\Large d = \begin{pmatrix} \cos\psi_i \cdot b_x - \sin\psi_i \cdot b_y \\\\ -(\sin\psi_i \cdot b_x + \cos\psi_i \cdot b_y) \end{pmatrix}\\]
+
+\\[\Large scan[i, j] = raycast(edt, p, d, R / res) \times res\\]
+
+The first is Puzzle 2's world-to-pixel transform without the floor and the
+clamp, applied to the laser mount instead of the car's centre; the second is
+the beam rotated by the heading, with its row component negated.
+
+| in the formula | in the code | meaning |
+|---|---|---|
+| \\(x_i, y_i, \psi_i\\) | `cars[i, 0]`, `cars[i, 1]`, `cars[i, 2]` | the car's world position and heading |
+| \\(\cos\psi_i, \sin\psi_i\\) | `ch`, `sh` | computed once per thread |
+| \\(m\\) | `LIDAR_MOUNT_X` | the laser mount, 0.2733 m ahead of the car's centre |
+| \\(b_x, b_y\\) | `lidar_dirs[j][0]`, `lidar_dirs[j][1]` | beam \\(j\\)'s unit direction in the car frame |
+| \\(o_x, o_y\\), \\(res\\), \\(H\\) | `ox`, `oy`, `res`, `edt.shape[0]` | the map, as in Puzzle 2 |
+| \\(R\\) | `LIDAR_RANGE` | the lidar range, 20 m |
+| \\(p, d\\) | `p`, `d` | `raycast`'s start pixel and unit direction from Puzzle 3 |
 
 ### The two frames
 
-The beam directions are unit vectors in the car frame, spread over a 270° fan
-with beam 0 pointing to the car's right-rear and the middle beam straight ahead.
-Rotating by \\(\psi\\) takes a beam into the world frame. The raster's row axis
-points the opposite way to world \\(y\\), so the row component of the direction
-is negated: that is the minus sign on the second row of \\(d\\). And the ray
-starts at the laser, not the car centre: `LIDAR_MOUNT_X` ahead of `base_link`
-along the heading.
+The beam directions are unit vectors in the car frame (\\(x\\) forward,
+\\(y\\) left), spread over a 270° fan centred on the car's nose: beam
+\\(j\\) points at \\(\theta_j = -135^\circ + 270^\circ \cdot j / 107\\), so
+\\((b_x, b_y) = (\cos\theta_j, \sin\theta_j)\\), with beam 0 pointing to the
+car's right-rear and beam 107 to its left-rear. Rotating by \\(\psi_i\\) takes
+a beam into the world frame. The raster's row axis points the opposite way to
+world \\(y\\), so the row component of the direction is negated: that is the
+minus sign on the second row of \\(d\\). And the ray starts at the laser, not
+the car centre: `LIDAR_MOUNT_X` ahead of `base_link` along the heading.
 
 ### Launch order
 
@@ -71,8 +88,8 @@ Notes:
   through SciPy's `distance_transform_edt`. It is warporacer's loader minus the
   centerline extraction, and the same file the Mojo twin drives through
   Python interop
-- **Beam directions** are built in NumPy with
-  `np.linspace(-FOV / 2, FOV / 2, NUM_LIDAR)` and passed as a
+- **Beam directions** are built in NumPy, `NUM_LIDAR` angles evenly spaced
+  over `LIDAR_FOV` with `np.linspace`, and passed as `(cos, sin)` pairs in a
   `wp.array(dtype=wp.vec2)`
 - `raycast` is Puzzle 3's solution, unchanged; it's in the listing so you can
   see its signature
@@ -143,12 +160,13 @@ Puzzle 04 complete ✅
 This solution, per thread:
 
 1. **Start point** `p`: the laser mount in world coordinates,
-   `(x + m cos ψ, y + m sin ψ)`, pushed through the Puzzle 2 transform. The
-   row uses `float(edt.shape[0] - 1) - ...` for the flip. There is no clamp
-   because `raycast` breaks out as soon as a sample leaves the raster
-2. **Direction** `d`: the beam rotated by the heading,
-   `(ch·bx − sh·by, sh·bx + ch·by)`, with the second component negated so that
-   "up" in the world is "toward row 0" in the raster
+   `(x + LIDAR_MOUNT_X * ch, y + LIDAR_MOUNT_X * sh)`, pushed through the
+   Puzzle 2 transform. The row uses `float(edt.shape[0] - 1) - ...` for the flip.
+   There is no clamp because `raycast` breaks out as soon as a sample leaves
+   the raster
+2. **Direction** `d`: the beam `(bx, by) = lidar_dirs[j]` rotated by the
+   heading, `(ch * bx - sh * by, sh * bx + ch * by)`, with the second component
+   negated so that "up" in the world is "toward row 0" in the raster
 3. **Range**: `raycast` works in pixels, so the maximum is `LIDAR_RANGE / res`
    and the result is multiplied back by `res`
 

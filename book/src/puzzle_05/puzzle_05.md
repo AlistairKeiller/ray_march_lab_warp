@@ -41,9 +41,9 @@ edt[0]  berlin   600 x 600  |  edt[1]  skirk   602 x 431  |  edt[2]  Spielberg 1
 ```
 
 The one place padding bites is the row flip. World \\(y = o_y\\) is the map's
-**own** bottom row, \\(h_{map} - 1\\), not row \\(H - 1\\) of the padded stack.
+**own** bottom row, `map_h[mid] - 1`, not row \\(H - 1\\) of the padded stack.
 Use `map_h[mid]`. With `edt.shape[1]` instead, berlin's cars would be placed
-530 rows, 26 meters, below their track, in the padding.
+530 rows, 26.5 meters, below their track, in the padding.
 
 ## Configuration
 
@@ -122,8 +122,8 @@ max |out - expected|: 2.00e+01 m
 This solution is Puzzle 4's kernel with three lookups in front of it:
 
 - `mid = map_id[i]` picks the car's map
-- `r = res[mid]` and `org = origin[mid]` replace the scalar `res` and `origin`
-  arguments
+- `r = res[mid]` and `org = origin[mid]` replace the scalar `res`, `ox` and
+  `oy` arguments
 - `map_h[mid]` replaces `edt.shape[0]` in the row flip, because the stack's
   height is the largest map's, not this one's
 

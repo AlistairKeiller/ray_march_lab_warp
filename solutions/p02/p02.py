@@ -20,12 +20,13 @@ def clearance(
     cars: wp.array2d(dtype=float),  # x, y, psi
     edt: wp.array2d(dtype=float),  # (row, col) px distance to nearest wall
     res: float,
-    origin: wp.vec2,
+    ox: float,  # world x, y of the bottom-left pixel
+    oy: float,
     output: wp.array(dtype=float),
 ):
     i = wp.tid()
-    col = wp.clamp(wp.int32((cars[i, 0] - origin[0]) / res), 0, edt.shape[1] - 1)
-    row = wp.clamp(wp.int32(float(edt.shape[0] - 1) - (cars[i, 1] - origin[1]) / res), 0, edt.shape[0] - 1)
+    col = wp.clamp(wp.int32((cars[i, 0] - ox) / res), 0, edt.shape[1] - 1)
+    row = wp.clamp(wp.int32(float(edt.shape[0] - 1) - (cars[i, 1] - oy) / res), 0, edt.shape[0] - 1)
     output[i] = edt[row, col] * res - HALF_DIAG
 
 
@@ -56,7 +57,7 @@ if __name__ == "__main__":
         )
     )
 
-    wp.launch(clearance, dim=NUM_CARS, inputs=[cars, edt, RES, wp.vec2(ORIGIN)], outputs=[out])
+    wp.launch(clearance, dim=NUM_CARS, inputs=[cars, edt, RES, ORIGIN[0], ORIGIN[1]], outputs=[out])
     wp.synchronize_device()
 
     # The same transform in numpy, in float32 like the kernel.

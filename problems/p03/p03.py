@@ -1,3 +1,6 @@
+from numpy.testing import break_cycles
+from numpy.ma import dstack
+from scipy.fft import dst
 import numpy as np
 import warp as wp
 from scipy.ndimage import distance_transform_edt
@@ -17,6 +20,16 @@ def raycast(edt: wp.array2d(dtype=float), p: wp.vec2, d: wp.vec2, max_px: float)
     """Sphere-march from pixel p along unit direction d (col, row); returns distance in px."""
     dist = float(0.0)
     # FILL ME IN (roughly 9 lines)
+    while dist < max_px:
+        col = wp.int32(p[0])
+        row = wp.int32(p[1])
+        if col < 0 or col >= edt.shape[1] or row < 0 or row >= edt.shape[0]:
+            break
+        step = edt[row, col]
+        if step == 0.0:
+            break
+        p += d * step
+        dist += step
     return wp.min(dist, max_px)
 
 

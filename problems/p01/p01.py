@@ -14,6 +14,7 @@ RES = 0.05  # meters per pixel, the F1TENTH map default
 def px_to_m(edt: wp.array(dtype=float), res: float, output: wp.array(dtype=float)):
     i = wp.tid()
     # FILL ME IN (roughly 1 line)
+    output[i] = edt[i] * res
 
 
 # ANCHOR_END: px_to_m

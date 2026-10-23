@@ -21,27 +21,33 @@ In this puzzle, you'll learn about:
 - `while` loops with a data-dependent trip count
 - Declaring a mutable float: `dist = float(0.0)`
 - `break` on a wall or a map edge
-- Vector arithmetic: `p += d * step`
+- `wp.vec2` as a 2D vector: `p += d * step` moves both coordinates
 
 ### The algorithm
 
-At the sample point \\(p\\), `edt[int(p.row), int(p.col)]` is the distance to the
-nearest wall. No wall can be closer than that in any direction, so the ray can
-jump exactly that far without passing through one:
+The sample point \\(p\\) is a pixel coordinate `(col, row)`, so `p[0]`
+indexes columns and `p[1]` rows, and `edt[wp.int32(p[1]), wp.int32(p[0])]` is the
+distance from the sample to the nearest wall. No wall can be closer than that
+in any direction, so the ray can jump exactly that far without passing through
+one:
 
-\\[\Large p \leftarrow p + d \cdot edt[p] \qquad dist \leftarrow dist + edt[p]\\]
+\\[\Large step = edt\big[\lfloor p[1] \rfloor, \lfloor p[0] \rfloor\big]\\]
 
-until the sample lands on a wall pixel (`edt == 0`), leaves the raster, or
-`dist` reaches `max_px`. In open space the steps are large and shrink only as
-the ray closes in on something. The figure draws each step as a circle of radius
-`edt[p]`: every circle touches the nearest wall and contains none.
+\\[\Large p \leftarrow p + step \cdot d \qquad dist \leftarrow dist + step\\]
+
+Repeat until the sample lands on a wall pixel (`step == 0`), leaves the raster,
+or `dist` reaches `max_px`, and return `min(dist, max_px)`. In open space the
+steps are large and shrink only as the ray closes in on something. The figure
+draws each step as a circle of radius `step`: every circle touches the nearest
+wall and contains none.
 
 Two details:
 
-- The sample `p` is a pixel coordinate `(col, row)`, so `p[0]` indexes columns
-  and `p[1]` rows
-- Test the bounds **before** reading `edt`, and return `wp.min(dist, max_px)`,
-  so a ray whose last step overshoots still reports the cap
+- Test the bounds **before** reading `edt`: a sample outside the raster has no
+  distance to read
+- The loop condition is checked before a step, not after, so the last step can
+  carry `dist` past `max_px`; the `wp.min` at the return is what makes a capped
+  ray report exactly the cap
 
 ### Memory access pattern
 

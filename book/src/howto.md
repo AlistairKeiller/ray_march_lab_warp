@@ -139,7 +139,7 @@ uv run python problems/p06/p06.py maps/Spielberg_map.yaml --device cpu
 bash scripts/check_problems.sh           # every unfilled skeleton runs and fails at its own check
 uv run python scripts/check_skeletons.py # problems == solutions outside the FILL regions
 uv run python scripts/check_canaries.py  # every learner-written kernel uses the guarded array
-uv run python scripts/check_book_refs.py # every include, link and image in the book resolves
+uv run python scripts/check_book_refs.py # every include, link and image resolves; no math Markdown would mangle
 
 # Figures (needs the viz extra)
 uv sync --extra viz

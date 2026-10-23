@@ -47,7 +47,7 @@ def lidar_multi(
     scan: wp.array2d(dtype=float),
 ):
     i, j = wp.tid()
-    # FILL ME IN (roughly 12 lines)
+    # FILL ME IN (roughly 14 lines)
 
 
 # ANCHOR_END: lidar_multi

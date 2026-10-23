@@ -40,7 +40,8 @@ def lidar(
     edt: wp.array2d(dtype=float),
     lidar_dirs: wp.array(dtype=wp.vec2),  # unit beam directions in the car frame
     res: float,
-    origin: wp.vec2,
+    ox: float,  # world x, y of the bottom-left pixel
+    oy: float,
     scan: wp.array2d(dtype=float),  # (car, beam) range in m
 ):
     """One thread per (car, beam): rays from the mount point, rotated into the heading
@@ -48,8 +49,15 @@ def lidar(
     i, j = wp.tid()
     ch = wp.cos(cars[i, 2])
     sh = wp.sin(cars[i, 2])
-    # FILL ME IN (roughly 9 lines)
-
+    p = wp.vec2(
+        (cars[i, 0] + LIDAR_MOUNT_X * ch - ox) / res,
+        float(edt.shape[0] - 1) - (cars[i, 1] + LIDAR_MOUNT_X * sh - oy) / res,
+    )
+    d = wp.vec2(
+        ch * lidar_dirs[j][0] - sh * lidar_dirs[j][1],
+        -(sh * lidar_dirs[j][0] + ch * lidar_dirs[j][1]),
+    )
+    scan[i,j] = raycast(edt, p, d, LIDAR_RANGE / res) * res
 
 # ANCHOR_END: lidar
 
@@ -96,7 +104,7 @@ if __name__ == "__main__":
     wp.launch(
         lidar,
         dim=(NUM_CARS, NUM_LIDAR),
-        inputs=[cars, edt, lidar_dirs, track.res, wp.vec2(track.ox, track.oy)],
+        inputs=[cars, edt, lidar_dirs, track.res, track.ox, track.oy],
         outputs=[scan],
     )
     wp.synchronize_device()

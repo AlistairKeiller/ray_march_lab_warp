@@ -106,7 +106,7 @@ of multiplies in between.
 
 | Part                         | Puzzles | You will write                                               |
 |------------------------------|---------|--------------------------------------------------------------|
-| I: Fundamentals              | 1–2     | A kernel, a launch, 2D indexing, vectors, clamps             |
+| I: Fundamentals              | 1–2     | A kernel, a launch, 2D indexing, scalar arguments, clamps    |
 | II: Ray marching             | 3–5     | The sphere march, a 108-beam lidar, a padded multi-map stack |
 | III: Performance             | 6       | A second thread layout, and a benchmark at warporacer scale  |
 
